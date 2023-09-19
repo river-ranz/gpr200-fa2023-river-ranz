@@ -53,44 +53,6 @@ unsigned int createShaderProgram(const char* vertexShaderSource, const char* fra
 	return shaderProgram;
 }
 
-	//unsigned int createShader(GLenum shaderType, const char* sourceCode) {
-	//	//creates a vertex shader
-	//	unsigned int vertexShader = glCreateShader(shaderType);
-	//	glShaderSource(vertexShader, 1, &sourceCode, NULL);
-	//	//compiles shader
-	//	glCompileShader(vertexShader);
-
-	//	int success;
-	//	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-	//	if (!success) {
-	//		char infoLog[512];
-	//		glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-	//		printf("Failed to compile shader: %s", infoLog);
-	//	}
-	//	return vertexShader;
-	//};
-
-	//unsigned int createShaderProgram(const char* vertexShaderSource, const char* fragmentShaderSource) {
-	//	unsigned int vertexShader = createShader(GL_VERTEX_SHADER, vertexShaderSource);
-	//	unsigned int fragmentShader = createShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
-
-	//	unsigned int shaderProgram = glCreateProgram();
-	//	glAttachShader(shaderProgram, vertexShader);
-	//	glAttachShader(shaderProgram, fragmentShader);
-	//	glLinkProgram(shaderProgram);
-
-	//	int success;
-	//	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-	//	if (!success) {
-	//		char infoLog[512];
-	//		glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-	//		printf("Failed to link shader program: %s", infoLog);
-	//	}
-	//	glDeleteShader(vertexShader);
-	//	glDeleteShader(fragmentShader);
-	//	return shaderProgram;
-	//};
-
 	Shader::Shader(const std::string& vertexShader, const std::string& fragmentShader)
 	{
 		std::string vertexShaderSource = loadShaderSourceFromFile(vertexShader.c_str());
