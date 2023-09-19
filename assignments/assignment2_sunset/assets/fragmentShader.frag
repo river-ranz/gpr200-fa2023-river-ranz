@@ -1,9 +1,10 @@
-const char* fragmentShaderSource = R(
+//const char* fragmentShaderSource = R(
 	#version 450
 	out vec4 FragColor;
-	uniform vec3 _Color;
-	uniform float _Brightness;
+	in vec2 UV;
+//	uniform vec3 _Color;
+//	uniform float _Brightness;
 	void main(){
-		FragColor = vec4(_Color * _Brightness,1.0);
+		FragColor = vec4(UV, 0.0, 1.0);
 	}
-);
+//);
