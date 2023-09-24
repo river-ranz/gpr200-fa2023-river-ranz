@@ -33,8 +33,16 @@ unsigned int indices[6] = {
 	0, 2, 3
 };
 
-float triangleColor[3] = { 1.0f, 0.5f, 0.0f };
-float triangleBrightness = 1.0f;
+float skyDayTop[3] = { 0.5, 0.3, 0.8 };
+float skyDayBottom[3] = { 1.0, 0.2, 0.0 };
+float skyNightTop[3] = { 0.0, 0.0, 1.0 };
+float skyNightBottom[3] = { 0.4, 0.1, 0.5 };
+float sunYellow[3] = { 0.85, 0.65, 0.0 };
+float sunOrange[3] = { 1.0, 0.4, 0.0 };
+float hillColor[3] = { 0.1, 0.1, 0.1 };
+float* radius = new float;
+float* speed = new float;
+float* resolution = new float[2];
 bool showImGUIDemoWindow = true;
 
 int main() {
@@ -67,7 +75,6 @@ int main() {
 	shader.use();
 
 	unsigned int vao = createVAO(vertices, 4, indices, 6);
-
 	glBindVertexArray(vao);
 
 	while (!glfwWindowShouldClose(window)) {
@@ -75,10 +82,25 @@ int main() {
 		glClearColor(0.3f, 0.4f, 0.9f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		//uniforms
-		shader.setVec2("_Resolution", SCREEN_WIDTH, SCREEN_HEIGHT);
+		//info for uniforms & ImGUI window
 		float time = (float)glfwGetTime();
+		*radius = 0.22f;
+		*speed = abs(sin(time));
+		*resolution = SCREEN_WIDTH;
+		*(resolution + 1) = SCREEN_HEIGHT;
+
+		//uniforms
 		shader.setFloat("_Time", time);
+		shader.setFloat("_SunRadius", 0.22);
+		shader.setFloat("_SunSpeed", abs(sin(time)));
+		shader.setVec2("_Resolution", SCREEN_WIDTH, SCREEN_HEIGHT);
+		shader.setVec3("_SkyDayColorTop", skyDayTop[0], skyDayTop[1], skyDayTop[2]);
+		shader.setVec3("_SkyDayColorBottom", skyDayBottom[0], skyDayBottom[1], skyDayBottom[2]);
+		shader.setVec3("_SkyNightColorTop", skyNightTop[0], skyNightTop[1], skyNightTop[2]);
+		shader.setVec3("_SkyNightColorBottom", skyNightBottom[0], skyNightBottom[1], skyNightBottom[2]);
+		shader.setVec3("_SunYellow", sunYellow[0], sunYellow[1], sunYellow[2]);
+		shader.setVec3("_SunOrange", sunOrange[0], sunOrange[1], sunOrange[2]);
+		shader.setVec3("_HillColor", hillColor[0], hillColor[1], hillColor[2]);
 		
 
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
@@ -91,8 +113,16 @@ int main() {
 
 			ImGui::Begin("Settings");
 			ImGui::Checkbox("Show Demo Window", &showImGUIDemoWindow);
-			ImGui::ColorEdit3("Color", triangleColor);
-			ImGui::SliderFloat("Brightness", &triangleBrightness, 0.0f, 1.0f);
+			ImGui::ColorEdit3("Sky Top Color", skyDayTop);
+			ImGui::ColorEdit3("Sky Bottom Color", skyDayBottom);
+			ImGui::ColorEdit3("Night Sky Top Color", skyNightTop);
+			ImGui::ColorEdit3("Night Sky Bottom Color", skyNightBottom);
+			ImGui::ColorEdit3("Sun Day Color", sunYellow);
+			ImGui::ColorEdit3("Sun Night Color", sunOrange);
+			ImGui::ColorEdit3("Hill Color", hillColor);
+			ImGui::DragFloat("Sun Radius", radius);
+			ImGui::DragFloat("Speed", speed);
+			ImGui::DragFloat2("Resolution", resolution);
 			ImGui::End();
 			if (showImGUIDemoWindow) {
 				ImGui::ShowDemoWindow(&showImGUIDemoWindow);
