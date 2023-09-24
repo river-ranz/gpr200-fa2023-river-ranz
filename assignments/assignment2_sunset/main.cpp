@@ -75,11 +75,12 @@ int main() {
 		glClearColor(0.3f, 0.4f, 0.9f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		//shader.setVec3("_Color", triangleColor[0], triangleColor[1], triangleColor[2]);
-		//shader.setFloat("_Brightness", triangleBrightness);
+		//uniforms
+		shader.setVec2("_Resolution", SCREEN_WIDTH, SCREEN_HEIGHT);
+		float time = (float)glfwGetTime();
+		shader.setFloat("_Time", time);
+		
 
-		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		//glDrawArrays(GL_TRIANGLES, 0, 3);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
 
 		//Render UI
