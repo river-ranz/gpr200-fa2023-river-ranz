@@ -9,6 +9,7 @@
 #include <imgui_impl_opengl3.h>
 
 #include <ew/shader.h>
+#include <riv/texture.h>
 
 struct Vertex {
 	float x, y, z;
@@ -58,7 +59,13 @@ int main() {
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init();
 
-	ew::Shader shader("assets/vertexShader.vert", "assets/fragmentShader.frag");
+	ew::Shader backgroundShader("assets/background.vert", "assets/background.frag");
+	unsigned int textureA = loadTexture("assets/wood-background.png", GL_REPEAT, GL_LINEAR);
+	unsigned int textureB = loadTexture("assets/noise-texture.png", GL_REPEAT, GL_LINEAR);
+
+	ew::Shader characterShader("assets/character.vert", "assets/character.frag");
+	unsigned int characterTexture = loadTexture("assets/pixel-cat.png", GL_REPEAT, GL_NEAREST);
+
 
 	unsigned int quadVAO = createVAO(vertices, 4, indices, 6);
 
@@ -69,10 +76,21 @@ int main() {
 		glClearColor(0.3f, 0.4f, 0.9f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, textureA);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, textureB);
+
 		//Set uniforms
-		shader.use();
+		backgroundShader.use();
+		backgroundShader.setInt("_WoodTexture", 0);
+		backgroundShader.setInt("_NoiseTexture", 1);
+
+		characterShader.use();
+		characterShader.setInt("_CatTexture", 0);
 
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, NULL);
+		glEnable(GL_BLEND);
 
 		//Render UI
 		{
