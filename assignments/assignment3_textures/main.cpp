@@ -61,7 +61,8 @@ int main() {
 
 	ew::Shader backgroundShader("assets/background.vert", "assets/background.frag");
 	unsigned int textureA = loadTexture("assets/wood-background.png", GL_REPEAT, GL_LINEAR);
-	unsigned int textureB = loadTexture("assets/noise-texture.png", GL_REPEAT, GL_LINEAR);
+	unsigned int textureB = loadTexture("assets/horror.png", GL_REPEAT, GL_LINEAR);
+	unsigned int textureC = loadTexture("assets/overlay-texture.png", GL_REPEAT, GL_LINEAR);
 
 	ew::Shader characterShader("assets/character.vert", "assets/character.frag");
 	unsigned int characterTexture = loadTexture("assets/pixel-cat.png", GL_REPEAT, GL_NEAREST);
@@ -69,28 +70,30 @@ int main() {
 
 	unsigned int quadVAO = createVAO(vertices, 4, indices, 6);
 
-	glBindVertexArray(quadVAO);
-
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
 		glClearColor(0.3f, 0.4f, 0.9f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
+		glBindVertexArray(quadVAO);
 
+		//Set uniforms
+		backgroundShader.use();
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, textureA);
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, textureB);
-
-		//Set uniforms
-		backgroundShader.use();
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, textureC);
 		backgroundShader.setInt("_WoodTexture", 0);
-		backgroundShader.setInt("_NoiseTexture", 1);
-
-		characterShader.use();
-		characterShader.setInt("_CatTexture", 0);
-
+		backgroundShader.setInt("_ScarySmile", 1);
+		backgroundShader.setInt("_OverlayTexture", 2);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, NULL);
-		glEnable(GL_BLEND);
+
+		//characterShader.use();
+		//glActiveTexture(GL_TEXTURE3);
+		//glBindTexture(GL_TEXTURE_2D, characterTexture);
+		//characterShader.setInt("_CatTexture", 3);
+		//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, NULL);
 
 		//Render UI
 		{
