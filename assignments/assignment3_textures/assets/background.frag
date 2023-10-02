@@ -5,10 +5,11 @@ in vec2 UV;
 uniform sampler2D _WoodTexture;
 uniform sampler2D _ScarySmile;
 uniform sampler2D _OverlayTexture;
+uniform float _Time;
 
 void main(){
 	float noise = texture(_OverlayTexture, UV).r;
-	vec2 uv = UV + noise * 0.7f;
+	vec2 uv = UV + noise * abs(sin(_Time));
 	vec4 colorA = texture(_WoodTexture, uv);
 	vec4 colorB = texture(_ScarySmile, uv);
 	vec3 color = mix(colorA.rgb, colorB.rgb, colorB.a * 0.3);

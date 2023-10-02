@@ -33,6 +33,17 @@ unsigned short indices[6] = {
 	2, 3, 0
 };
 
+int wrapType[4] = { GL_REPEAT, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_BORDER, GL_MIRRORED_REPEAT};
+std::string repeatStr = "Repeat", edgeClampStr = "Clamp to Edge", borderClampStr = "Clamp to Border", mirroredStr = "Mirrored Repeat";
+const char* repeat = repeatStr.c_str();
+const char* edgeClamp = edgeClampStr.c_str();
+const char* borderClamp = borderClampStr.c_str();
+const char* mirrored = mirroredStr.c_str();
+const char* WRAP_MODE_TYPE[4] = { repeat, edgeClamp, borderClamp, mirrored };
+int wrapMode = wrapType[0];
+std::string backWrapLabelStr = "Background Wrap Mode";
+const char* backWrapLabel = backWrapLabelStr.c_str();
+
 int main() {
 	printf("Initializing...");
 	if (!glfwInit()) {
@@ -60,9 +71,9 @@ int main() {
 	ImGui_ImplOpenGL3_Init();
 
 	ew::Shader backgroundShader("assets/background.vert", "assets/background.frag");
-	unsigned int textureA = loadTexture("assets/wood-background.png", GL_REPEAT, GL_LINEAR);
-	unsigned int textureB = loadTexture("assets/horror.png", GL_REPEAT, GL_LINEAR);
-	unsigned int textureC = loadTexture("assets/overlay-texture.png", GL_REPEAT, GL_LINEAR);
+	unsigned int textureA = loadTexture("assets/wood-background.png", wrapMode, GL_LINEAR);
+	unsigned int textureB = loadTexture("assets/horror.png", wrapMode, GL_LINEAR);
+	unsigned int textureC = loadTexture("assets/overlay-texture.png", wrapMode, GL_LINEAR);
 
 	ew::Shader characterShader("assets/character.vert", "assets/character.frag");
 	unsigned int characterTexture = loadTexture("assets/pixel-cat.png", GL_REPEAT, GL_NEAREST);
@@ -76,6 +87,8 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT);
 		glBindVertexArray(quadVAO);
 
+		float time = (float)glfwGetTime();
+
 		//Set uniforms
 		backgroundShader.use();
 		glActiveTexture(GL_TEXTURE0);
@@ -87,13 +100,18 @@ int main() {
 		backgroundShader.setInt("_WoodTexture", 0);
 		backgroundShader.setInt("_ScarySmile", 1);
 		backgroundShader.setInt("_OverlayTexture", 2);
+		backgroundShader.setFloat("_Time", time);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, NULL);
 
-		//characterShader.use();
-		//glActiveTexture(GL_TEXTURE3);
-		//glBindTexture(GL_TEXTURE_2D, characterTexture);
-		//characterShader.setInt("_CatTexture", 3);
-		//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, NULL);
+		characterShader.use();
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, characterTexture);
+		characterShader.setInt("_CatTexture", 0);
+		characterShader.setFloat("_Time", time);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, NULL);
+
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		//Render UI
 		{
@@ -102,6 +120,7 @@ int main() {
 			ImGui::NewFrame();
 
 			ImGui::Begin("Settings");
+			//ImGui::ListBox(*backWrapLabel, wrapType[0], *WRAP_MODE_TYPE, 4);
 			ImGui::End();
 
 			ImGui::Render();
