@@ -2,14 +2,13 @@
 out vec4 FragColor;
 in vec2 UV;
 
-uniform sampler2D _WoodTexture;
-uniform sampler2D _ScarySmile;
-uniform sampler2D _OverlayTexture;
-uniform float _Time;
+uniform sampler2D _WoodTexture, _ScarySmile, _OverlayTexture;
+uniform float _Time, _Tiling;
 
 void main(){
-	float noise = texture(_OverlayTexture, UV).r;
-	vec2 uv = UV + noise * abs(sin(_Time));
+	vec2 tileUV = vec2(UV.x / _Tiling, UV.y / _Tiling);
+	float noise = texture(_OverlayTexture, tileUV).r;
+	vec2 uv = tileUV + noise * abs(sin(_Time));
 	vec4 colorA = texture(_WoodTexture, uv);
 	vec4 colorB = texture(_ScarySmile, uv);
 	vec3 color = mix(colorA.rgb, colorB.rgb, colorB.a * 0.3);

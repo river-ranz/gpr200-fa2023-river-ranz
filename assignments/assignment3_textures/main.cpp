@@ -34,15 +34,12 @@ unsigned short indices[6] = {
 };
 
 int wrapType[4] = { GL_REPEAT, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_BORDER, GL_MIRRORED_REPEAT};
-std::string repeatStr = "Repeat", edgeClampStr = "Clamp to Edge", borderClampStr = "Clamp to Border", mirroredStr = "Mirrored Repeat";
-const char* repeat = repeatStr.c_str();
-const char* edgeClamp = edgeClampStr.c_str();
-const char* borderClamp = borderClampStr.c_str();
-const char* mirrored = mirroredStr.c_str();
-const char* WRAP_MODE_TYPE[4] = { repeat, edgeClamp, borderClamp, mirrored };
-int wrapMode = wrapType[0];
-std::string backWrapLabelStr = "Background Wrap Mode";
-const char* backWrapLabel = backWrapLabelStr.c_str();
+const char* WRAP_MODE_TYPE[4] = { "Repeat", "Clamp to Edge", "Clamp to Border", "Mirrored Repeat"};
+int currentItem = 0;
+int wrapMode = wrapType[currentItem];
+int prevMode = wrapMode;
+
+float* tilingFloat = new float;
 
 int main() {
 	printf("Initializing...");
@@ -80,12 +77,21 @@ int main() {
 
 
 	unsigned int quadVAO = createVAO(vertices, 4, indices, 6);
+	*tilingFloat = 0.5f;
 
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
 		glClearColor(0.3f, 0.4f, 0.9f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		glBindVertexArray(quadVAO);
+
+		int wrapMode = wrapType[currentItem];
+		if (prevMode != wrapMode) {
+			textureA = loadTexture("assets/wood-background.png", wrapMode, GL_LINEAR);
+			textureB = loadTexture("assets/horror.png", wrapMode, GL_LINEAR);
+			textureC = loadTexture("assets/overlay-texture.png", wrapMode, GL_LINEAR);
+			prevMode = wrapMode;
+		}
 
 		float time = (float)glfwGetTime();
 
@@ -101,6 +107,7 @@ int main() {
 		backgroundShader.setInt("_ScarySmile", 1);
 		backgroundShader.setInt("_OverlayTexture", 2);
 		backgroundShader.setFloat("_Time", time);
+		backgroundShader.setFloat("_Tiling", *tilingFloat);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, NULL);
 
 		characterShader.use();
@@ -120,7 +127,8 @@ int main() {
 			ImGui::NewFrame();
 
 			ImGui::Begin("Settings");
-			//ImGui::ListBox(*backWrapLabel, wrapType[0], *WRAP_MODE_TYPE, 4);
+			ImGui::ListBox("Wrap Mode", &currentItem, WRAP_MODE_TYPE, IM_ARRAYSIZE(WRAP_MODE_TYPE));
+			ImGui::DragFloat("Tiling", tilingFloat, 0.01f);
 			ImGui::End();
 
 			ImGui::Render();
