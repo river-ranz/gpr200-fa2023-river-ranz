@@ -8,7 +8,7 @@ uniform float _Time;
 void main(){
 	UV = vUV;
 	vec3 pos = vPos;
-	pos *= 0.8;
-	vec3 offset = vec3(abs(sin(_Time) * 0.5) - 0.1, abs(sin(_Time * 2.0)) * 0.5 - 0.2, 0);
+	pos *= 0.8; //scaling
+	vec3 offset = vec3(abs(sin(_Time) * 0.5) - 0.1, abs(sin(_Time * 2.0)) * 0.5 - 0.2, 0); //movement
 	gl_Position = vec4(pos + offset, 1.0);
 }

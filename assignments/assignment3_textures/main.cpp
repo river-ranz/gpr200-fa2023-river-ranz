@@ -85,7 +85,10 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT);
 		glBindVertexArray(quadVAO);
 
-		int wrapMode = wrapType[currentItem];
+		wrapMode = wrapType[currentItem];
+		//reloads background textures if and only if the wrap mode changed
+		//problem: slow. causes graphics to stutter due to reloading textures
+		//how to better implement this feature? attempted to create function to change the wrap mode but was unsuccessful
 		if (prevMode != wrapMode) {
 			textureA = loadTexture("assets/wood-background.png", wrapMode, GL_LINEAR);
 			textureB = loadTexture("assets/horror.png", wrapMode, GL_LINEAR);
@@ -95,26 +98,33 @@ int main() {
 
 		float time = (float)glfwGetTime();
 
-		//Set uniforms
+		//background shader
 		backgroundShader.use();
+		//bind textures
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, textureA);
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, textureB);
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, textureC);
+		//set uniforms
 		backgroundShader.setInt("_WoodTexture", 0);
 		backgroundShader.setInt("_ScarySmile", 1);
 		backgroundShader.setInt("_OverlayTexture", 2);
 		backgroundShader.setFloat("_Time", time);
 		backgroundShader.setFloat("_Tiling", *tilingFloat);
+		//draw
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, NULL);
 
+		//character shader
 		characterShader.use();
+		//bind texture
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, characterTexture);
+		//set uniforms
 		characterShader.setInt("_CatTexture", 0);
 		characterShader.setFloat("_Time", time);
+		//draw
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, NULL);
 
 		glEnable(GL_BLEND);
@@ -128,7 +138,7 @@ int main() {
 
 			ImGui::Begin("Settings");
 			ImGui::ListBox("Wrap Mode", &currentItem, WRAP_MODE_TYPE, IM_ARRAYSIZE(WRAP_MODE_TYPE));
-			ImGui::DragFloat("Tiling", tilingFloat, 0.01f);
+			ImGui::DragFloat("Tiling", tilingFloat, 0.01f); //scaling
 			ImGui::End();
 
 			ImGui::Render();

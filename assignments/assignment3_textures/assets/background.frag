@@ -6,7 +6,7 @@ uniform sampler2D _WoodTexture, _ScarySmile, _OverlayTexture;
 uniform float _Time, _Tiling;
 
 void main(){
-	vec2 tileUV = vec2(UV.x / _Tiling, UV.y / _Tiling);
+	vec2 tileUV = vec2(UV.x / _Tiling, UV.y / _Tiling); //scaling
 	float noise = texture(_OverlayTexture, tileUV).r;
 	vec2 uv = tileUV + noise * abs(sin(_Time));
 	vec4 colorA = texture(_WoodTexture, uv);
