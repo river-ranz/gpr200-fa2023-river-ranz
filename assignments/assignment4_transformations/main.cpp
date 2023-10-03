@@ -11,12 +11,14 @@
 #include <ew/shader.h>
 #include <ew/ewMath/vec3.h>
 #include <ew/procGen.h>
+#include <riv/transformations.h>
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 
 //Square aspect ratio for now. We will account for this with projection later.
 const int SCREEN_WIDTH = 720;
 const int SCREEN_HEIGHT = 720;
+const int NUM_CUBES = 4;
 
 int main() {
 	printf("Initializing...");
@@ -52,6 +54,8 @@ int main() {
 	glEnable(GL_DEPTH_TEST);
 
 	ew::Shader shader("assets/vertexShader.vert", "assets/fragmentShader.frag");
+
+	riversLibrary::Transform transform[4] = { riversLibrary::;
 	
 	//Cube mesh
 	ew::Mesh cubeMesh(ew::createCube(0.5f));
@@ -64,9 +68,7 @@ int main() {
 
 		//Set uniforms
 		shader.use();
-
-		//TODO: Set model matrix uniform
-
+		shader.setMat4("_Model", transform[0].getModelMatrix());
 		cubeMesh.draw();
 
 		//Render UI
@@ -76,6 +78,15 @@ int main() {
 			ImGui::NewFrame();
 
 			ImGui::Begin("Transform");
+			for (size_t i = 0; i < NUM_CUBES; i++) {
+				ImGui::PushID(i);
+				if (ImGui::CollapsingHeader("Transform")) {
+					ImGui::DragFloat3("Position", &transform[i].position.x, 0.05f);
+					ImGui::DragFloat3("Rotation", &transform[i].rotation.x, 1.0f);
+					ImGui::DragFloat3("Scale", &transform[i].scale.x, 0.05f);
+				}
+				ImGui::PopID();
+			}
 			ImGui::End();
 
 			ImGui::Render();
