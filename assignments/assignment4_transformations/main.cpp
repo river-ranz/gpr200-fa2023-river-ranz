@@ -55,8 +55,12 @@ int main() {
 
 	ew::Shader shader("assets/vertexShader.vert", "assets/fragmentShader.frag");
 
-	riversLibrary::Transform transform[4] = { riversLibrary::;
-	
+	riversLibrary::Transform transform[NUM_CUBES];
+	transform[0].position = ew::Vec3(0.5f, 0.5f, 0.0f);
+	transform[1].position = ew::Vec3(0.5f, -0.5f, 0.0f);
+	transform[2].position = ew::Vec3(-0.5f, -0.5f, 0.0f);
+	transform[3].position = ew::Vec3(-0.5f, 0.5f, 0.0f);
+
 	//Cube mesh
 	ew::Mesh cubeMesh(ew::createCube(0.5f));
 	
@@ -69,6 +73,12 @@ int main() {
 		//Set uniforms
 		shader.use();
 		shader.setMat4("_Model", transform[0].getModelMatrix());
+		cubeMesh.draw();
+		shader.setMat4("_Model", transform[1].getModelMatrix());
+		cubeMesh.draw();
+		shader.setMat4("_Model", transform[2].getModelMatrix());
+		cubeMesh.draw();
+		shader.setMat4("_Model", transform[3].getModelMatrix());
 		cubeMesh.draw();
 
 		//Render UI
