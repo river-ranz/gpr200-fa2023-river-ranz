@@ -1,7 +1,7 @@
 #pragma once
 #include "../ew/ewMath/mat4.h"
 #include "../ew/ewMath/vec3.h"
-#include <ew/ewMath/ewMath.h>
+#include "../ew/ewMath/ewMath.h"
 
 namespace riversLibrary {
 	inline ew::Mat4 Identity() {
@@ -55,6 +55,42 @@ namespace riversLibrary {
 			0, 1, 0, t.y,
 			0, 0, 1, t.z,
 			0, 0, 0, 1
+		);
+	};
+
+	//https://learnopengl.com/Getting-started/Camera
+	//d - direction
+	//r - right
+	//u - up
+	inline ew::Mat4 LookAt(ew::Vec3 eye, ew::Vec3 target, ew::Vec3 up) {
+		ew::Vec3 d = ew::Normalize(eye - target);
+		ew::Vec3 r = ew::Normalize(ew::Cross(up, d));
+		ew::Vec3 u = ew::Cross(d, r);
+		return ew::Mat4(
+			r.x, r.y, r.z, -(ew::Dot(r, eye)),
+			u.x, u.y, u.z, -(ew::Dot(u, eye)),
+			d.x, d.y, d.z, -(ew::Dot(d, eye)),
+			0, 0, 0, 1
+		);
+	};
+
+	inline ew::Mat4 Orthographic(float height, float aspect, float near, float far) {
+		float width = aspect / height, r = width / 2, l = -r;
+		float t = height / 2, b = -t;
+		return ew::Mat4(
+			(2/(r - l)), 0, 0, -((r + l)/(r - l)),
+			0, (2/(t - b)), 0, -((t + b)/(t - b)),
+			0, 0, -(2/(far - near)), -((far + near)/(far - near)),
+			0, 0, 0, 1
+		);
+	};
+
+	inline ew::Mat4 Perspective(float fov, float aspect, float near, float far) {
+		return ew::Mat4(
+			(1/(tan(fov/2) * aspect)), 0, 0, 0,
+			0, (1/(tan(fov/2))), 0, 0,
+			0, 0, ((near + far)/(near - far)), ((2 * far * near)/(near - far)),
+			0, 0, -1, 0
 		);
 	};
 
