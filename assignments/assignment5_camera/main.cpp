@@ -67,9 +67,9 @@ int main() {
 		cubeTransforms[i].position.y = i / (NUM_CUBES / 2) - 0.5;
 	}
 
-	ew::Vec3 position = (0, 0, 5);
-	ew::Vec3 target = (0, 0, 0);
-	float fov = 60;
+	ew::Vec3 position = (0.0f, 0.0f, 5.0f);
+	ew::Vec3 target = (0.0f, 0.0f, 0.0f);
+	float fov = 60.0f;
 
 	riversLibrary::Camera camera;
 	camera.position = position;
@@ -105,17 +105,17 @@ int main() {
 			ImGui::NewFrame();
 
 			ImGui::Begin("Settings");
-			//ImGui::Text("Cubes");
-			//for (size_t i = 0; i < NUM_CUBES; i++)
-			//{
-			//	ImGui::PushID(i);
-			//	if (ImGui::CollapsingHeader("Transform")) {
-			//		ImGui::DragFloat3("Position", &cubeTransforms[i].position.x, 0.05f);
-			//		ImGui::DragFloat3("Rotation", &cubeTransforms[i].rotation.x, 1.0f);
-			//		ImGui::DragFloat3("Scale", &cubeTransforms[i].scale.x, 0.05f);
-			//	}
-			//	ImGui::PopID();
-			//}
+			ImGui::Text("Cubes");
+			for (size_t i = 0; i < NUM_CUBES; i++)
+			{
+				ImGui::PushID(i);
+				if (ImGui::CollapsingHeader("Transform")) {
+					ImGui::DragFloat3("Position", &cubeTransforms[i].position.x, 0.05f);
+					ImGui::DragFloat3("Rotation", &cubeTransforms[i].rotation.x, 1.0f);
+					ImGui::DragFloat3("Scale", &cubeTransforms[i].scale.x, 0.05f);
+				}
+				ImGui::PopID();
+			}
 			ImGui::Text("Camera");
 			ImGui::DragFloat3("Position", &position.x, 0.05f);
 			ImGui::DragFloat3("Target", &target.x, 0.05f);
