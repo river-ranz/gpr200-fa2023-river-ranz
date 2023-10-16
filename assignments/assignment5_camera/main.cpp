@@ -70,14 +70,17 @@ int main() {
 	ew::Vec3 position = (0.0f, 0.0f, 5.0f);
 	ew::Vec3 target = (0.0f, 0.0f, 0.0f);
 	float fov = 60.0f;
+	float orthoSize = 6;
+	bool ortho = false;
 
 	riversLibrary::Camera camera;
 	camera.position = position;
 	camera.target = target;
 	camera.fov = fov;
-	camera.orthoSize = 6;
+	camera.orthoSize = orthoSize;
 	camera.nearPlane = 0.1;
 	camera.farPlane = 100;
+	camera.orthographic = ortho;
 
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
@@ -105,21 +108,23 @@ int main() {
 			ImGui::NewFrame();
 
 			ImGui::Begin("Settings");
-			ImGui::Text("Cubes");
-			for (size_t i = 0; i < NUM_CUBES; i++)
-			{
-				ImGui::PushID(i);
-				if (ImGui::CollapsingHeader("Transform")) {
-					ImGui::DragFloat3("Position", &cubeTransforms[i].position.x, 0.05f);
-					ImGui::DragFloat3("Rotation", &cubeTransforms[i].rotation.x, 1.0f);
-					ImGui::DragFloat3("Scale", &cubeTransforms[i].scale.x, 0.05f);
-				}
-				ImGui::PopID();
-			}
+			//ImGui::Text("Cubes");
+			//for (size_t i = 0; i < NUM_CUBES; i++)
+			//{
+			//	ImGui::PushID(i);
+			//	if (ImGui::CollapsingHeader("Transform")) {
+			//		ImGui::DragFloat3("Position", &cubeTransforms[i].position.x, 0.05f);
+			//		ImGui::DragFloat3("Rotation", &cubeTransforms[i].rotation.x, 1.0f);
+			//		ImGui::DragFloat3("Scale", &cubeTransforms[i].scale.x, 0.05f);
+			//	}
+			//	ImGui::PopID();
+			//}
 			ImGui::Text("Camera");
 			ImGui::DragFloat3("Position", &position.x, 0.05f);
 			ImGui::DragFloat3("Target", &target.x, 0.05f);
 			ImGui::DragFloat("FOV", &fov);
+			ImGui::DragFloat("Orthographic Height", &orthoSize);
+			ImGui::Checkbox("Orthographic", &ortho);
 			ImGui::End();
 			
 			ImGui::Render();

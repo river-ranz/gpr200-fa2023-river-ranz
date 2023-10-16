@@ -75,8 +75,11 @@ namespace riversLibrary {
 	};
 
 	inline ew::Mat4 Orthographic(float height, float aspect, float near, float far) {
-		float width = aspect / height, r = width / 2, l = -r;
-		float t = height / 2, b = -t;
+		float width = aspect / height;
+		float r = width / 2;
+		float l = -r;
+		float t = height / 2;
+		float b = -t;
 		return ew::Mat4(
 			(2/(r - l)), 0, 0, -((r + l)/(r - l)),
 			0, (2/(t - b)), 0, -((t + b)/(t - b)),
