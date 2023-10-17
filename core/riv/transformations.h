@@ -65,7 +65,7 @@ namespace riversLibrary {
 	inline ew::Mat4 LookAt(ew::Vec3 eye, ew::Vec3 target, ew::Vec3 up) {
 		ew::Vec3 d = ew::Normalize(eye - target);
 		ew::Vec3 r = ew::Normalize(ew::Cross(up, d));
-		ew::Vec3 u = ew::Cross(d, r);
+		ew::Vec3 u = ew::Normalize(ew::Cross(d, r));
 		return ew::Mat4(
 			r.x, r.y, r.z, -(ew::Dot(r, eye)),
 			u.x, u.y, u.z, -(ew::Dot(u, eye)),
@@ -75,14 +75,14 @@ namespace riversLibrary {
 	};
 
 	inline ew::Mat4 Orthographic(float height, float aspect, float near, float far) {
-		float width = aspect / height;
+		float width = (height * aspect);
 		float r = width / 2;
 		float l = -r;
 		float t = height / 2;
 		float b = -t;
 		return ew::Mat4(
-			(2/(r - l)), 0, 0, -((r + l)/(r - l)),
-			0, (2/(t - b)), 0, -((t + b)/(t - b)),
+			2/(r - l), 0, 0, -((r + l)/(r - l)),
+			0, 2/(t - b), 0, -((t + b)/(t - b)),
 			0, 0, -(2/(far - near)), -((far + near)/(far - near)),
 			0, 0, 0, 1
 		);
@@ -90,9 +90,9 @@ namespace riversLibrary {
 
 	inline ew::Mat4 Perspective(float fov, float aspect, float near, float far) {
 		return ew::Mat4(
-			(1/(tan(fov/2) * aspect)), 0, 0, 0,
-			0, (1/(tan(fov/2))), 0, 0,
-			0, 0, ((near + far)/(near - far)), ((2 * far * near)/(near - far)),
+			1/(tan(fov/2) * aspect), 0, 0, 0,
+			0, 1/(tan(fov/2)), 0, 0,
+			0, 0, (near + far)/(near - far), (2 * far * near)/(near - far),
 			0, 0, -1, 0
 		);
 	};

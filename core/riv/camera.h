@@ -28,4 +28,13 @@ namespace riversLibrary {
 		}
 		return Perspective(fov, aspectRatio, nearPlane, farPlane);
 	}
+
+
+	struct CameraControls {
+		double prevMouseX, prevMouseY;
+		float yaw = 0, pitch = 0; //degrees
+		float mouseSensitivity = 0.1f;
+		bool firstMouse = true;
+		float moveSpeed = 5.0f;
+	};
 }

@@ -14,6 +14,7 @@
 #include <riv/camera.h>
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
+void moveCamera(GLFWwindow* window, riversLibrary::Camera* camera, riversLibrary::CameraControls* controls);
 
 //Projection will account for aspect ratio!
 const int SCREEN_WIDTH = 1080;
@@ -81,9 +82,13 @@ int main() {
 	camera.nearPlane = 0.1;
 	camera.farPlane = 100;
 	camera.orthographic = ortho;
+	camera.aspectRatio = (float)SCREEN_WIDTH / SCREEN_HEIGHT;
+
+	riversLibrary::CameraControls cameraControls;
 
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
+		moveCamera(window, &camera, &cameraControls);
 		glClearColor(0.3f, 0.4f, 0.9f, 1.0f);
 		//Clear both color buffer AND depth buffer
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -141,3 +146,46 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 	glViewport(0, 0, width, height);
 }
 
+void moveCamera(GLFWwindow* window, riversLibrary::Camera* camera, riversLibrary::CameraControls* controls) {
+	if (!glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_2)) {
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		controls->firstMouse = true;
+		return;
+	}
+
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+	double mouseX, mouseY;
+	glfwGetCursorPos(window, &mouseX, &mouseY);
+
+	if (controls->firstMouse) {
+		controls->firstMouse = false;
+		controls->prevMouseX = mouseX;
+		controls->prevMouseY = mouseY;
+	}
+
+	float yawRad = controls->yaw * (3.14159 / 180);
+	float pitchRad = controls->pitch * (3.14159 / 180);
+
+	ew::Vec3 forward = (cos(yawRad) * cos(pitchRad), sin(pitchRad), sin(yawRad) * cos(pitchRad));
+	ew::Vec3 right = ew::Normalize(ew::Cross(forward, (0, 1, 0)));
+	ew::Vec3 up = ew::Normalize(ew::Cross(right, forward));
+
+//TODO: Get mouse position delta for this frame
+
+
+	camera->target = camera->position + forward;
+
+	controls->yaw += (mouseX - controls->prevMouseX) * controls->mouseSensitivity;
+	controls->pitch -= (mouseY - controls->prevMouseY) * controls->mouseSensitivity;
+//TODO: Clamp pitch between -89 and 89 degrees
+	if (controls->pitch > 89) {
+
+	}
+	else if (controls->pitch < -89) {
+
+	}
+
+	controls->prevMouseX = mouseX;
+	controls->prevMouseY = mouseY;
+}
