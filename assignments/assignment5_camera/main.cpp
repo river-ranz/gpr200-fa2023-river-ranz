@@ -125,11 +125,11 @@ int main() {
 			//	ImGui::PopID();
 			//}
 			ImGui::Text("Camera");
-			ImGui::DragFloat3("Position", &position.x, 0.05f);
-			ImGui::DragFloat3("Target", &target.x, 0.05f);
-			ImGui::DragFloat("FOV", &fov);
-			ImGui::DragFloat("Orthographic Height", &orthoSize);
-			ImGui::Checkbox("Orthographic", &ortho);
+			ImGui::DragFloat3("Position", &camera.position.x, 0.05f);
+			ImGui::DragFloat3("Target", &camera.target.x, 0.05f);
+			ImGui::DragFloat("FOV", &camera.fov);
+			ImGui::DragFloat("Orthographic Height", &camera.orthoSize);
+			ImGui::Checkbox("Orthographic", &camera.orthographic);
 			ImGui::End();
 			
 			ImGui::Render();
