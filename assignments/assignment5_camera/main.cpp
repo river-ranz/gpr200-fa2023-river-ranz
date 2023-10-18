@@ -14,7 +14,7 @@
 #include <riv/camera.h>
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
-void moveCamera(GLFWwindow* window, riversLibrary::Camera* camera, riversLibrary::CameraControls* controls);
+void moveCamera(GLFWwindow* window, riversLibrary::Camera* camera, riversLibrary::CameraControls* controls, float time);
 
 //Projection will account for aspect ratio!
 const int SCREEN_WIDTH = 1080;
@@ -68,27 +68,36 @@ int main() {
 		cubeTransforms[i].position.y = i / (NUM_CUBES / 2) - 0.5;
 	}
 
-	ew::Vec3 position = (0.0f, 0.0f, 5.0f);
-	ew::Vec3 target = (0.0f, 0.0f, 0.0f);
+	ew::Vec3 position = ew::Vec3(0.0f, 0.0f, 5.0f);
+	ew::Vec3 target = ew::Vec3(0.0f, 0.0f, 0.0f);
 	float fov = 60.0f;
 	float orthoSize = 6;
 	bool ortho = false;
+	float nearPlane = 0.1;
+	float farPlane = 100;
 
 	riversLibrary::Camera camera;
 	camera.position = position;
 	camera.target = target;
 	camera.fov = fov;
 	camera.orthoSize = orthoSize;
-	camera.nearPlane = 0.1;
-	camera.farPlane = 100;
+	camera.nearPlane = nearPlane;
+	camera.farPlane = farPlane;
 	camera.orthographic = ortho;
 	camera.aspectRatio = (float)SCREEN_WIDTH / SCREEN_HEIGHT;
 
 	riversLibrary::CameraControls cameraControls;
 
+	float prevTime = (float)glfwGetTime();
+
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
-		moveCamera(window, &camera, &cameraControls);
+
+		float time = (float)glfwGetTime();
+		float deltaTime = time - prevTime;
+		prevTime = time;
+
+		moveCamera(window, &camera, &cameraControls, deltaTime);
 		glClearColor(0.3f, 0.4f, 0.9f, 1.0f);
 		//Clear both color buffer AND depth buffer
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -113,23 +122,23 @@ int main() {
 			ImGui::NewFrame();
 
 			ImGui::Begin("Settings");
-			//ImGui::Text("Cubes");
-			//for (size_t i = 0; i < NUM_CUBES; i++)
-			//{
-			//	ImGui::PushID(i);
-			//	if (ImGui::CollapsingHeader("Transform")) {
-			//		ImGui::DragFloat3("Position", &cubeTransforms[i].position.x, 0.05f);
-			//		ImGui::DragFloat3("Rotation", &cubeTransforms[i].rotation.x, 1.0f);
-			//		ImGui::DragFloat3("Scale", &cubeTransforms[i].scale.x, 0.05f);
-			//	}
-			//	ImGui::PopID();
-			//}
 			ImGui::Text("Camera");
 			ImGui::DragFloat3("Position", &camera.position.x, 0.05f);
 			ImGui::DragFloat3("Target", &camera.target.x, 0.05f);
 			ImGui::DragFloat("FOV", &camera.fov);
 			ImGui::DragFloat("Orthographic Height", &camera.orthoSize);
 			ImGui::Checkbox("Orthographic", &camera.orthographic);
+			ImGui::DragFloat("Near Plane", &camera.nearPlane);
+			ImGui::DragFloat("Far Plane", &camera.farPlane);
+			if (ImGui::Button("Reset")) {
+				camera.position = ew::Vec3(0.0f, 0.0f, 5.0f);
+				camera.target = ew::Vec3(0.0f, 0.0f, 0.0f);
+				camera.fov = 60.0f;
+				camera.orthoSize = 6;
+				camera.orthographic = false;
+				camera.nearPlane = 0.1;
+				camera.farPlane = 100;
+			}
 			ImGui::End();
 			
 			ImGui::Render();
@@ -146,7 +155,7 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 	glViewport(0, 0, width, height);
 }
 
-void moveCamera(GLFWwindow* window, riversLibrary::Camera* camera, riversLibrary::CameraControls* controls) {
+void moveCamera(GLFWwindow* window, riversLibrary::Camera* camera, riversLibrary::CameraControls* controls, float time) {
 	if (!glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_2)) {
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		controls->firstMouse = true;
@@ -164,26 +173,42 @@ void moveCamera(GLFWwindow* window, riversLibrary::Camera* camera, riversLibrary
 		controls->prevMouseY = mouseY;
 	}
 
-	float yawRad = controls->yaw * (3.14159 / 180);
-	float pitchRad = controls->pitch * (3.14159 / 180);
+	float yawRad = controls->yaw * ew::DEG2RAD;
+	float pitchRad = controls->pitch * ew::DEG2RAD;
 
-	ew::Vec3 forward = (cos(yawRad) * cos(pitchRad), sin(pitchRad), sin(yawRad) * cos(pitchRad));
-	ew::Vec3 right = ew::Normalize(ew::Cross(forward, (0, 1, 0)));
+	ew::Vec3 forward = ew::Vec3(sin(yawRad) * cos(pitchRad), sin(pitchRad), -cos(yawRad) * cos(pitchRad));
+	ew::Vec3 right = ew::Normalize(ew::Cross(forward, ew::Vec3(0, 1, 0)));
 	ew::Vec3 up = ew::Normalize(ew::Cross(right, forward));
 
-//TODO: Get mouse position delta for this frame
-
+	if (glfwGetKey(window, GLFW_KEY_W)) {
+		camera->position += forward * controls->moveSpeed * time;
+	}
+	if (glfwGetKey(window, GLFW_KEY_S)) {
+		camera->position -= forward * controls->moveSpeed * time;
+	}
+	if (glfwGetKey(window, GLFW_KEY_D)) {
+		camera->position += right * controls->moveSpeed * time;
+	}
+	if (glfwGetKey(window, GLFW_KEY_A)) {
+		camera->position -= right * controls->moveSpeed * time;
+	}
+	if (glfwGetKey(window, GLFW_KEY_Q)) {
+		camera->position -= up * controls->moveSpeed * time;
+	}
+	if (glfwGetKey(window, GLFW_KEY_E)) {
+		camera->position += up * controls->moveSpeed * time;
+	}
 
 	camera->target = camera->position + forward;
 
 	controls->yaw += (mouseX - controls->prevMouseX) * controls->mouseSensitivity;
 	controls->pitch -= (mouseY - controls->prevMouseY) * controls->mouseSensitivity;
-//TODO: Clamp pitch between -89 and 89 degrees
-	if (controls->pitch > 89) {
 
+	if (controls->pitch > 89) {
+		controls->pitch = -89;
 	}
 	else if (controls->pitch < -89) {
-
+		controls->pitch = 89;
 	}
 
 	controls->prevMouseX = mouseX;

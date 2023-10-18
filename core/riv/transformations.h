@@ -66,25 +66,12 @@ namespace riversLibrary {
 		ew::Vec3 d = ew::Normalize(eye - target);
 		ew::Vec3 r = ew::Normalize(ew::Cross(up, d));
 		ew::Vec3 u = ew::Normalize(ew::Cross(d, r));
-		//return ew::Mat4(
-		//	r.x, r.y, r.z, -(ew::Dot(r, eye)),
-		//	u.x, u.y, u.z, -(ew::Dot(u, eye)),
-		//	d.x, d.y, d.z, -(ew::Dot(d, eye)),
-		//	0, 0, 0, 1
-		//);
-		ew::Mat4 R = ew::Mat4(
-			r.x, r.y, r.z, 0,
-			u.x, u.y, u.z, 0,
-			d.x, d.y, d.z, 0,
+		return ew::Mat4(
+			r.x, r.y, r.z, -(ew::Dot(r, eye)),
+			u.x, u.y, u.z, -(ew::Dot(u, eye)),
+			d.x, d.y, d.z, -(ew::Dot(d, eye)),
 			0, 0, 0, 1
 		);
-		ew::Mat4 T = ew::Mat4(
-			1, 0, 0, -eye.x,
-			0, 1, 0, -eye.y,
-			0, 0, 1, -eye.z,
-			0, 0, 0, 1
-		);
-		return R * T;
 	};
 
 	inline ew::Mat4 Orthographic(float height, float aspect, float near, float far) {
