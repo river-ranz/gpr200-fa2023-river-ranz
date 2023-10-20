@@ -138,6 +138,8 @@ int main() {
 				camera.orthographic = false;
 				camera.nearPlane = 0.1;
 				camera.farPlane = 100;
+				cameraControls.yaw = 0;
+				cameraControls.pitch = 0;
 			}
 			ImGui::End();
 			
