@@ -86,7 +86,7 @@ int main() {
 	ew::MeshData planeMeshData = riversLibrary::createPlane(0.5f, 5);
 	ew::Mesh planeMesh(planeMeshData);
 
-	ew::MeshData cylinderMeshData = riversLibrary::createCylinder(5.0f, 1.0f, 10);
+	ew::MeshData cylinderMeshData = riversLibrary::createCylinder(1.0f, 0.5f, 15);
 	ew::Mesh cylinderMesh(cylinderMeshData);
 
 	ew::MeshData sphereMeshData = riversLibrary::createSphere(0.5f, 64);
@@ -134,6 +134,8 @@ int main() {
 		shader.setMat4("_Model", cubeTransform.getModelMatrix());
 		cubeMesh.draw((ew::DrawMode)appSettings.drawAsPoints);
 		planeMesh.draw((ew::DrawMode)appSettings.drawAsPoints);
+		cylinderMesh.draw((ew::DrawMode)appSettings.drawAsPoints);
+		sphereMesh.draw((ew::DrawMode)appSettings.drawAsPoints);
 
 		//Render UI
 		{
