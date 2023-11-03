@@ -31,7 +31,6 @@ namespace riversLibrary {
 		}
 
 		poleStart = numSegments; //fix
-		sideStart = numSegments + 1;
 		for (int i = 0; i < numSegments; i++) {
 			mesh->indices.push_back(sideStart + i);
 			mesh->indices.push_back(poleStart + i);
@@ -74,13 +73,20 @@ namespace riversLibrary {
 			ew::Vertex vert;
 			vert.pos = pos;
 			vert.normal = normal;
-			vert.uv = ew::Vec2(cos(theta) * radius, sin(theta) * radius);
+			vert.uv = ew::Vec2(i / numSegments, i / numSegments);
 			mesh->vertices.push_back(vert);
 		}
 
+		int start = numSegments;
+		int center = 0;
 		for (int i = 0; i <= numSegments; i++) {
-			int start = 0 - numSegments;
-			int center = 0;
+			mesh->indices.push_back(start + i);
+			mesh->indices.push_back(center);
+			mesh->indices.push_back(start + i + 1);
+		}
+
+		//center = radius;
+		for (int i = 0; i <= numSegments; i++) {
 			mesh->indices.push_back(start + i);
 			mesh->indices.push_back(center);
 			mesh->indices.push_back(start + i + 1);
@@ -93,18 +99,21 @@ namespace riversLibrary {
 			mesh->indices.push_back(start);
 			mesh->indices.push_back(start + 1);
 			mesh->indices.push_back(start + columns);
+			mesh->indices.push_back(start + columns + 1);
+			mesh->indices.push_back(start + columns);
+			mesh->indices.push_back(start + 1);
 		}
 	}
 
 	ew::MeshData createCylinder(float height, float radius, int numSegments) {
 		ew::MeshData mesh;
-		mesh.vertices.reserve(numSegments * 2);
-		mesh.indices.reserve(numSegments * 2);
+		mesh.vertices.reserve(numSegments * 4);
+		mesh.indices.reserve(numSegments * 4);
 		float topY = height / 2;
 		float bottomY = -topY;
 		createCylinderFace(ew::Vec3{ +0.0f, topY, +0.0f }, height, numSegments, radius, &mesh);
-		createCylinderFace(ew::Vec3{ +0.0f, topY, +0.0f }, height, numSegments, radius, &mesh);
-		createCylinderFace(ew::Vec3{ +0.0f, bottomY, +0.0f }, height, numSegments, radius, &mesh);
+		createCylinderFace(ew::Vec3{ +0.0f, +0.0f, +0.0f }, height, numSegments, radius, &mesh);
+		createCylinderFace(ew::Vec3{ +0.0f, +0.0f, +1.0f }, height, numSegments, radius, &mesh);
 		createCylinderFace(ew::Vec3{ +0.0f, bottomY, +0.0f }, height, numSegments, radius, &mesh);
 		return mesh;
 	}
@@ -119,12 +128,13 @@ namespace riversLibrary {
 		for (int row = 0; row <= subdivisions; row++) {
 			for (int col = 0; col <= subdivisions; col++) {
 				ew::Vec3 pos = normal * size * -0.5f;
-				pos -= (a + b) * size * -1.5f;
+				pos -= (a + b) * size;
 				pos += (a * col + b * row) * size;
+				pos.x += 1.5f;
 				ew::Vertex vert;
 				vert.pos = pos;
 				vert.normal = normal;
-				vert.uv = ew::Vec2(col / subdivisions, row / subdivisions); //fix
+				vert.uv = ew::Vec2(((col + 1) / (row + 1) * subdivisions), ((row + 1) / (col + 1) * subdivisions)); //fix
 				mesh->vertices.push_back(vert);
 			}
 		}

@@ -86,10 +86,10 @@ int main() {
 	ew::MeshData planeMeshData = riversLibrary::createPlane(0.5f, 5);
 	ew::Mesh planeMesh(planeMeshData);
 
-	ew::MeshData cylinderMeshData = riversLibrary::createCylinder(1.0f, 0.5f, 15);
+	ew::MeshData cylinderMeshData = riversLibrary::createCylinder(1.0f, 0.5f, 16);
 	ew::Mesh cylinderMesh(cylinderMeshData);
 
-	ew::MeshData sphereMeshData = riversLibrary::createSphere(0.5f, 64);
+	ew::MeshData sphereMeshData = riversLibrary::createSphere(0.5f, 16);
 	ew::Mesh sphereMesh(sphereMeshData);
 
 	//Initialize transforms
