@@ -16,8 +16,8 @@ namespace riversLibrary {
 				pos.z = radius * sin(theta) * sin(phi);
 				ew::Vertex vert;
 				vert.pos = pos;
-				vert.normal = normal;
-				vert.uv = ew::Vec2(col / numSegments, row / numSegments); //fix
+				vert.normal = normal; //fix
+				vert.uv = ew::Vec2(col / (numSegments / 0.5), row / (numSegments / 0.5)); //fix
 				mesh->vertices.push_back(vert);
 			}
 		}
@@ -30,7 +30,7 @@ namespace riversLibrary {
 			mesh->indices.push_back(sideStart + i + 1);
 		}
 
-		poleStart = numSegments; //fix
+		//fix
 		for (int i = 0; i < numSegments; i++) {
 			mesh->indices.push_back(sideStart + i);
 			mesh->indices.push_back(poleStart + i);
@@ -72,20 +72,20 @@ namespace riversLibrary {
 			pos.y = height / 2;
 			ew::Vertex vert;
 			vert.pos = pos;
-			vert.normal = normal;
-			vert.uv = ew::Vec2(i / numSegments, i / numSegments);
+			vert.normal = normal; //fix
+			vert.uv = ew::Vec2(i / numSegments, i / numSegments); //fix
 			mesh->vertices.push_back(vert);
 		}
 
 		int start = numSegments;
-		int center = 0;
+		int center = 0; //fix
 		for (int i = 0; i <= numSegments; i++) {
 			mesh->indices.push_back(start + i);
 			mesh->indices.push_back(center);
 			mesh->indices.push_back(start + i + 1);
 		}
 
-		//center = radius;
+		center = numSegments; //fix
 		for (int i = 0; i <= numSegments; i++) {
 			mesh->indices.push_back(start + i);
 			mesh->indices.push_back(center);
@@ -112,8 +112,8 @@ namespace riversLibrary {
 		float topY = height / 2;
 		float bottomY = -topY;
 		createCylinderFace(ew::Vec3{ +0.0f, topY, +0.0f }, height, numSegments, radius, &mesh);
-		createCylinderFace(ew::Vec3{ +0.0f, +0.0f, +0.0f }, height, numSegments, radius, &mesh);
-		createCylinderFace(ew::Vec3{ +0.0f, +0.0f, +1.0f }, height, numSegments, radius, &mesh);
+		createCylinderFace(ew::Vec3{ +1.0f, +0.0f, +1.0f }, height, numSegments, radius, &mesh); //fix
+		createCylinderFace(ew::Vec3{ -1.0f, +0.0f, -1.0f }, height, numSegments, radius, &mesh); //fix
 		createCylinderFace(ew::Vec3{ +0.0f, bottomY, +0.0f }, height, numSegments, radius, &mesh);
 		return mesh;
 	}
@@ -134,7 +134,7 @@ namespace riversLibrary {
 				ew::Vertex vert;
 				vert.pos = pos;
 				vert.normal = normal;
-				vert.uv = ew::Vec2(((col + 1) / (row + 1) * subdivisions), ((row + 1) / (col + 1) * subdivisions)); //fix
+				vert.uv = ew::Vec2(col / (subdivisions / 0.5), row / (subdivisions / 0.5)); //fix
 				mesh->vertices.push_back(vert);
 			}
 		}
