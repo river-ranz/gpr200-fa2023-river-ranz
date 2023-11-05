@@ -11,27 +11,30 @@ namespace riversLibrary {
 			for (int col = 0; col <= numSegments; col++) {
 				float theta = col * thetaStep;
 				ew::Vec3 pos;
-				pos.x = radius * cos(theta) * sin(phi) - 1.5f;
+				pos.x = radius * cos(theta) * sin(phi);
 				pos.y = radius * cos(phi);
 				pos.z = radius * sin(theta) * sin(phi);
 				ew::Vertex vert;
 				vert.pos = pos;
-				vert.normal = normal; //fix
-				vert.uv = ew::Vec2(col / (numSegments / 0.5), row / (numSegments / 0.5)); //fix
+				vert.normal = ew::Vec3(cos(theta) * sin(phi), cos(phi), sin(theta) * sin(phi));
+				vert.uv = ew::Vec2(col / (numSegments * 1.0), row / (numSegments * 1.0));
 				mesh->vertices.push_back(vert);
 			}
 		}
 
-		int poleStart = 0;
-		int sideStart = numSegments + 1;
-		for (int i = 0; i < numSegments; i++) {
-			mesh->indices.push_back(sideStart + i);
-			mesh->indices.push_back(poleStart + i);
+		//bottom cap
+		int poleStart = mesh->vertices.size() - 1 - numSegments;
+		int sideStart = poleStart - numSegments - 1;
+		for (int i = 0; i <= numSegments; i++) {
 			mesh->indices.push_back(sideStart + i + 1);
+			mesh->indices.push_back(poleStart + i);
+			mesh->indices.push_back(sideStart + i);
 		}
 
-		//fix
-		for (int i = 0; i < numSegments; i++) {
+		//top cap
+		poleStart = 0;
+		sideStart = numSegments;
+		for (int i = 0; i <= numSegments; i++) {
 			mesh->indices.push_back(sideStart + i);
 			mesh->indices.push_back(poleStart + i);
 			mesh->indices.push_back(sideStart + i + 1);
@@ -67,30 +70,31 @@ namespace riversLibrary {
 		for (int i = 0; i <= numSegments; i++) {
 			float theta = i * thetaStep;
 			ew::Vec3 pos;
-			pos.x = cos(theta) * radius - 3.0f;
+			pos.x = cos(theta) * radius;
 			pos.z = sin(theta) * radius;
 			pos.y = height / 2;
 			ew::Vertex vert;
 			vert.pos = pos;
-			vert.normal = normal; //fix
-			vert.uv = ew::Vec2(i / numSegments, i / numSegments); //fix
+			vert.normal = ew::Vec3(cos(theta), 0.0f, sin(theta)); //fix
+			vert.uv = ew::Vec2(i / numSegments, cos(sin(theta))); //fix u between 0 and 2pi, v between h/2 and -h/2
 			mesh->vertices.push_back(vert);
 		}
 
+		//top ring
 		int start = numSegments;
-		int center = 0; //fix
+		float center = 0;
 		for (int i = 0; i <= numSegments; i++) {
 			mesh->indices.push_back(start + i);
 			mesh->indices.push_back(center);
 			mesh->indices.push_back(start + i + 1);
 		}
 
-		center = numSegments; //fix
-		for (int i = 0; i <= numSegments; i++) {
-			mesh->indices.push_back(start + i);
-			mesh->indices.push_back(center);
-			mesh->indices.push_back(start + i + 1);
-		}
+		//bottom ring
+		//for (int i = 0; i <= numSegments; i++) {
+		//	mesh->indices.push_back(start + i + 1);
+		//	mesh->indices.push_back(center);
+		//	mesh->indices.push_back(start + i);
+		//}
 
 		int sideStart = 0;
 		int columns = numSegments + 1;
@@ -105,16 +109,25 @@ namespace riversLibrary {
 		}
 	}
 
+	//change whole format!!!
 	ew::MeshData createCylinder(float height, float radius, int numSegments) {
 		ew::MeshData mesh;
 		mesh.vertices.reserve(numSegments * 4);
 		mesh.indices.reserve(numSegments * 4);
 		float topY = height / 2;
 		float bottomY = -topY;
+
+		ew::Vertex center;
+		center.pos = ew::Vec3(0, topY, 0);
+		center.normal = ew::Vec3(0.0f, 0.0f, 0.0f);
+		mesh.vertices.push_back(center);
 		createCylinderFace(ew::Vec3{ +0.0f, topY, +0.0f }, height, numSegments, radius, &mesh);
 		createCylinderFace(ew::Vec3{ +1.0f, +0.0f, +1.0f }, height, numSegments, radius, &mesh); //fix
 		createCylinderFace(ew::Vec3{ -1.0f, +0.0f, -1.0f }, height, numSegments, radius, &mesh); //fix
-		createCylinderFace(ew::Vec3{ +0.0f, bottomY, +0.0f }, height, numSegments, radius, &mesh);
+		createCylinderFace(ew::Vec3{ +0.0f, bottomY, +0.0f }, -height, numSegments, radius, &mesh);
+		center.pos = ew::Vec3(0, bottomY, 0);
+		center.normal = ew::Vec3(0.0f, 0.0f, 0.0f);
+		mesh.vertices.push_back(center);
 		return mesh;
 	}
 
@@ -127,14 +140,14 @@ namespace riversLibrary {
 
 		for (int row = 0; row <= subdivisions; row++) {
 			for (int col = 0; col <= subdivisions; col++) {
-				ew::Vec3 pos = normal * size * -0.5f;
+				ew::Vec3 pos = normal * size;
 				pos -= (a + b) * size;
 				pos += (a * col + b * row) * size;
 				pos.x += 1.5f;
 				ew::Vertex vert;
 				vert.pos = pos;
 				vert.normal = normal;
-				vert.uv = ew::Vec2(col / (subdivisions / 0.5), row / (subdivisions / 0.5)); //fix
+				vert.uv = ew::Vec2(col / (subdivisions * 1.0), row / (subdivisions * 1.0));
 				mesh->vertices.push_back(vert);
 			}
 		}
