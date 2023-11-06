@@ -62,40 +62,27 @@ namespace riversLibrary {
 		return mesh;
 	}
 
-	static void createCylinderFace(ew::Vec3 normal, float height, int numSegments, float radius, ew::MeshData* mesh) {
-		unsigned int startVertex = mesh->vertices.size();
-		float size = ew::PI * radius * 2 * height;
-		float thetaStep = (2 * ew::PI) / numSegments;
-
-		for (int i = 0; i <= numSegments; i++) {
-			float theta = i * thetaStep;
-			ew::Vec3 pos;
-			pos.x = cos(theta) * radius;
-			pos.z = sin(theta) * radius;
-			pos.y = height / 2;
-			ew::Vertex vert;
-			vert.pos = pos;
-			vert.normal = ew::Vec3(cos(theta), 0.0f, sin(theta)); //fix
-			vert.uv = ew::Vec2(i / numSegments, cos(sin(theta))); //fix u between 0 and 2pi, v between h/2 and -h/2
-			mesh->vertices.push_back(vert);
-		}
-
-		//top ring
-		int start = numSegments;
-		float center = 0;
+	static void topRingIndices(int numSegments, ew::MeshData* mesh) {
+		int start = 0;
+		int center = 0;
 		for (int i = 0; i <= numSegments; i++) {
 			mesh->indices.push_back(start + i);
 			mesh->indices.push_back(center);
 			mesh->indices.push_back(start + i + 1);
 		}
+	}
 
-		//bottom ring
-		//for (int i = 0; i <= numSegments; i++) {
-		//	mesh->indices.push_back(start + i + 1);
-		//	mesh->indices.push_back(center);
-		//	mesh->indices.push_back(start + i);
-		//}
+	static void bottomRingIndices(int numSegments, ew::MeshData* mesh) {
+		int start = numSegments + 1;
+		int center = 0;
+		for (int i = 0; i <= numSegments; i++) {
+			mesh->indices.push_back(start + i + 1);
+			mesh->indices.push_back(center);
+			mesh->indices.push_back(start + i);
+		}
+	}
 
+	static void sideIndices(int numSegments, ew::MeshData* mesh) {
 		int sideStart = 0;
 		int columns = numSegments + 1;
 		for (int i = 0; i < columns; i++) {
@@ -109,7 +96,25 @@ namespace riversLibrary {
 		}
 	}
 
-	//change whole format!!!
+	static void createCylinderVert(ew::Vec3 normal, float height, int numSegments, float radius, ew::MeshData* mesh) {
+		unsigned int startVertex = mesh->vertices.size();
+		float size = ew::PI * radius * 2 * height;
+		float thetaStep = (2 * ew::PI) / numSegments;
+
+		for (int i = 0; i <= numSegments; i++) {
+			float theta = i * thetaStep;
+			ew::Vec3 pos;
+			pos.x = cos(theta) * radius;
+			pos.z = sin(theta) * radius;
+			pos.y = height / 2;
+			ew::Vertex vert;
+			vert.pos = pos;
+			vert.normal = ew::Normalize(pos); //fix
+			vert.uv = ew::Vec2(i / (numSegments * 1.0), cos(sin(theta))); //fix u between 0 and 2pi, v between h/2 and -h/2
+			mesh->vertices.push_back(vert);
+		}
+	}
+
 	ew::MeshData createCylinder(float height, float radius, int numSegments) {
 		ew::MeshData mesh;
 		mesh.vertices.reserve(numSegments * 4);
@@ -117,17 +122,19 @@ namespace riversLibrary {
 		float topY = height / 2;
 		float bottomY = -topY;
 
-		ew::Vertex center;
-		center.pos = ew::Vec3(0, topY, 0);
-		center.normal = ew::Vec3(0.0f, 0.0f, 0.0f);
-		mesh.vertices.push_back(center);
-		createCylinderFace(ew::Vec3{ +0.0f, topY, +0.0f }, height, numSegments, radius, &mesh);
-		createCylinderFace(ew::Vec3{ +1.0f, +0.0f, +1.0f }, height, numSegments, radius, &mesh); //fix
-		createCylinderFace(ew::Vec3{ -1.0f, +0.0f, -1.0f }, height, numSegments, radius, &mesh); //fix
-		createCylinderFace(ew::Vec3{ +0.0f, bottomY, +0.0f }, -height, numSegments, radius, &mesh);
-		center.pos = ew::Vec3(0, bottomY, 0);
-		center.normal = ew::Vec3(0.0f, 0.0f, 0.0f);
-		mesh.vertices.push_back(center);
+		ew::Vertex topCenter;
+		topCenter.pos = ew::Vec3(0, topY, 0);
+		mesh.vertices.push_back(topCenter);
+
+		createCylinderVert(ew::Vec3{ +0.0f, topY, +0.0f }, height, numSegments, radius, &mesh);
+		createCylinderVert(ew::Vec3{ +0.0f, bottomY, +0.0f }, -height, numSegments, radius, &mesh);
+		topRingIndices(numSegments, &mesh);
+		bottomRingIndices(numSegments, &mesh);
+		sideIndices(numSegments, &mesh);
+
+		ew::Vertex bottomCenter;
+		bottomCenter.pos = ew::Vec3(0, bottomY, 0);
+		mesh.vertices.push_back(bottomCenter);
 		return mesh;
 	}
 
