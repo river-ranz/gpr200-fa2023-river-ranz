@@ -97,7 +97,7 @@ int main() {
 	ew::Transform planeTransform;
 	planeTransform.position = ew::Vec3(0.0f, -1.0f, -0.5f);
 	ew::Transform cylinderTransform;
-	cylinderTransform.position = ew::Vec3(-2.5f, 0.0f, 0.0f);
+	cylinderTransform.position = ew::Vec3(-3.0f, 0.0f, 0.0f);
 	ew::Transform sphereTransform;
 	sphereTransform.position = ew::Vec3(-1.2f, 0.0f, 0.0f);
 
