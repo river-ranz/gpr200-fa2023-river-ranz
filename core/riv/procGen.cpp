@@ -74,7 +74,7 @@ namespace riversLibrary {
 
 	static void bottomRingIndices(int numSegments, ew::MeshData* mesh) {
 		int start = numSegments + 1;
-		int center = 0;
+		int center = mesh->vertices.size();
 		for (int i = 0; i <= numSegments; i++) {
 			mesh->indices.push_back(start + i + 1);
 			mesh->indices.push_back(center);
@@ -109,7 +109,7 @@ namespace riversLibrary {
 			pos.y = height / 2;
 			ew::Vertex vert;
 			vert.pos = pos;
-			vert.normal = ew::Normalize(ew::Vec3(cos(theta), 0, sin(theta))); //fix- caps
+			vert.normal = ew::Normalize(ew::Vec3(cos(theta), height / 2, sin(theta)));
 			vert.uv = ew::Vec2(i / (numSegments * 1.0), cos(sin(theta))); //fix- u between 0 and 2pi, v between -h/2 and h/2
 			mesh->vertices.push_back(vert);
 		}
@@ -124,16 +124,18 @@ namespace riversLibrary {
 
 		ew::Vertex topCenter;
 		topCenter.pos = ew::Vec3(0, topY, 0);
+		topCenter.normal = (numSegments + 1) * ew::Normalize(ew::Vec3(0.0, topY, 0.0));
 		mesh.vertices.push_back(topCenter);
 
 		createCylinderVert(ew::Vec3{ +0.0f, topY, +0.0f }, height, numSegments, radius, &mesh);
 		createCylinderVert(ew::Vec3{ +0.0f, bottomY, +0.0f }, -height, numSegments, radius, &mesh);
 		topRingIndices(numSegments, &mesh);
-		bottomRingIndices(numSegments, &mesh); //fix- connects to top center?
+		bottomRingIndices(numSegments, &mesh);
 		sideIndices(numSegments, &mesh);
 
 		ew::Vertex bottomCenter;
 		bottomCenter.pos = ew::Vec3(0, bottomY, 0);
+		bottomCenter.normal = (numSegments + 1) * ew::Normalize(ew::Vec3(0.0, bottomY, 0.0));
 		mesh.vertices.push_back(bottomCenter);
 		return mesh;
 	}
