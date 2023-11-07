@@ -15,8 +15,6 @@
 #include <ew/camera.h>
 #include <ew/cameraController.h>
 
-#include <riv/lighting.h>
-
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 void resetCamera(ew::Camera& camera, ew::CameraController& cameraController);
 
@@ -29,6 +27,18 @@ ew::Vec3 bgColor = ew::Vec3(0.1f);
 
 ew::Camera camera;
 ew::CameraController cameraController;
+
+struct Lights {
+	ew::Vec4 position;
+	ew::Vec3 color;
+};
+
+struct Material {
+	float ambientK;
+	float diffuseK;
+	float specular;
+	float shininess;
+};
 
 int main() {
 	printf("Initializing...");
@@ -63,6 +73,7 @@ int main() {
 
 	ew::Shader shader("assets/defaultLit.vert", "assets/defaultLit.frag");
 	unsigned int brickTexture = ew::loadTexture("assets/brick_color.jpg",GL_REPEAT,GL_LINEAR);
+	ew::Shader lightShader("assets/unlit.vert", "assets/unlit.frag");
 
 	//Create cube
 	ew::Mesh cubeMesh(ew::createCube(1.0f));
@@ -79,7 +90,22 @@ int main() {
 	sphereTransform.position = ew::Vec3(-1.5f, 0.0f, 0.0f);
 	cylinderTransform.position = ew::Vec3(1.5f, 0.0f, 0.0f);
 
-	riversLibrary::Lights lights[MAX_LIGHTS];
+	Lights lights[MAX_LIGHTS];
+
+	ew::Transform lightTransform[MAX_LIGHTS];
+	lightTransform[0].position = ew::Vec3(1.5f, 1.5f, -1.5f);
+	lightTransform[1].position = ew::Vec3(1.5f, 1.5f, 1.5f);
+	lightTransform[2].position = ew::Vec3(-1.5f, 1.5f, -1.5f);
+	lightTransform[3].position = ew::Vec3(-1.5f, 1.5f, 1.5f);
+
+	lights[0].color = ew::Vec3(1.0f, 0.0f, 0.0f);
+	lights[1].color = ew::Vec3(0.0f, 1.0f, 0.0f);
+	lights[2].color = ew::Vec3(0.0f, 0.0f, 1.0f);
+	lights[3].color = ew::Vec3(1.0f, 0.0f, 1.0f);
+
+	ew::Mesh lightMesh(ew::createSphere(0.2f, 16));
+
+	Material material;
 
 	resetCamera(camera,cameraController);
 
@@ -116,9 +142,16 @@ int main() {
 		shader.setMat4("_Model", cylinderTransform.getModelMatrix());
 		cylinderMesh.draw();
 
+		lightShader.use();
+
 		//TODO: Render point lights
-		shader.setVec4("_Lights[0].position", lights[0].position);
-		shader.setVec3("_Lights[0].color", lights[0].color);
+		lightShader.setVec4("_Lights[0].position", lights[0].position);
+		lightShader.setVec3("_Lights[0].color", lights[0].color);
+		for (int i = 0; i < MAX_LIGHTS; i++) {
+			lightShader.setMat4("_Model", lightTransform[i].getModelMatrix());
+			lightShader.setVec3("_Color", lights[i].color);
+			lightMesh.draw();
+		}
 
 		//Render UI
 		{
@@ -150,14 +183,18 @@ int main() {
 			//ImGui::Checkbox("Orbit Lights", &orbit);
 			//ImGui::DragFloat("Orbit Radius", &orbitRadius, 0.1f);
 			if (ImGui::CollapsingHeader("Light")) {
-				ImGui::DragFloat3("Position", &lights->position.x, 0.1f);
-				ImGui::ColorEdit3("Color", &lights->color.x, 0.1f);
+				for (size_t i = 0; i < MAX_LIGHTS; i++) {
+					ImGui::PushID(i);
+					ImGui::DragFloat3("Position", &lightTransform[i].position.x, 0.1f);
+					ImGui::ColorEdit3("Color", &lights[i].color.x, 0.1f);
+					ImGui::PopID();
+				}
 			}
 			if (ImGui::CollapsingHeader("Material")) {
-				//ImGui::DragFloat("AmbientK", &material.ambient, 0.1f, 0.0f, 1.0f);
-				//ImGui::DragFloat("DiffuseK", &material.diffuse, 0.1f, 0.0f, 1.0f);
-				//ImGui::DragFloat("SpecularK", &material.specular, 0.1f, 0.0f, 1.0f);
-				//ImGui::DragFloat("Shininess", &material.shininess, 0.1f, 0.0f, 100.0f);
+				ImGui::DragFloat("AmbientK", &material.ambientK, 0.1f, 0.0f, 1.0f);
+				ImGui::DragFloat("DiffuseK", &material.diffuseK, 0.1f, 0.0f, 1.0f);
+				ImGui::DragFloat("SpecularK", &material.specular, 0.1f, 0.0f, 1.0f);
+				ImGui::DragFloat("Shininess", &material.shininess, 0.1f, 0.0f, 100.0f);
 			}
 			ImGui::End();
 			

@@ -3,6 +3,8 @@ out vec4 FragColor;
 
 in Surface{
 	vec2 UV;
+	vec3 worldPosition;
+	vec3 worldNormal;
 }fs_in;
 
 struct Light {
@@ -15,5 +17,6 @@ uniform sampler2D _Texture;
 uniform Light _Lights[MAX_LIGHTS];
 
 void main(){
+	vec3 normal = normalize(fs_in.worldNormal);
 	FragColor = texture(_Texture,fs_in.UV);
 }
