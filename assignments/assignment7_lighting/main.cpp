@@ -106,6 +106,10 @@ int main() {
 	ew::Mesh lightMesh(ew::createSphere(0.2f, 16));
 
 	Material material;
+	material.ambientK = 0.5f;
+	material.diffuseK = 0.5f;
+	material.specular = 0.5f;
+	material.shininess = 5;
 
 	resetCamera(camera,cameraController);
 
@@ -121,13 +125,19 @@ int main() {
 		cameraController.Move(window, &camera, deltaTime);
 
 		//RENDER
-		glClearColor(bgColor.x, bgColor.y,bgColor.z,1.0f);
+		glClearColor(bgColor.x, bgColor.y, bgColor.z, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		shader.use();
 		glBindTexture(GL_TEXTURE_2D, brickTexture);
 		shader.setInt("_Texture", 0);
 		shader.setMat4("_ViewProjection", camera.ProjectionMatrix() * camera.ViewMatrix());
+		shader.setVec4("_Lights[0].position", lights[0].position);
+		shader.setVec3("_Lights[0].color", lights[0].color);
+		shader.setFloat("_AmbientK", material.ambientK);
+		shader.setFloat("_DiffuseK", material.diffuseK);
+		shader.setFloat("_Specular", material.specular);
+		shader.setFloat("_Shininess", material.shininess);
 
 		//Draw shapes
 		shader.setMat4("_Model", cubeTransform.getModelMatrix());
@@ -143,10 +153,9 @@ int main() {
 		cylinderMesh.draw();
 
 		lightShader.use();
+		lightShader.setMat4("_ViewProjection", camera.ProjectionMatrix() * camera.ViewMatrix());
 
 		//TODO: Render point lights
-		lightShader.setVec4("_Lights[0].position", lights[0].position);
-		lightShader.setVec3("_Lights[0].color", lights[0].color);
 		for (int i = 0; i < MAX_LIGHTS; i++) {
 			lightShader.setMat4("_Model", lightTransform[i].getModelMatrix());
 			lightShader.setVec3("_Color", lights[i].color);
@@ -191,9 +200,9 @@ int main() {
 				}
 			}
 			if (ImGui::CollapsingHeader("Material")) {
-				ImGui::DragFloat("AmbientK", &material.ambientK, 0.1f, 0.0f, 1.0f);
-				ImGui::DragFloat("DiffuseK", &material.diffuseK, 0.1f, 0.0f, 1.0f);
-				ImGui::DragFloat("SpecularK", &material.specular, 0.1f, 0.0f, 1.0f);
+				ImGui::DragFloat("AmbientK", &material.ambientK, 0.01f, 0.0f, 1.0f);
+				ImGui::DragFloat("DiffuseK", &material.diffuseK, 0.01f, 0.0f, 1.0f);
+				ImGui::DragFloat("SpecularK", &material.specular, 0.01f, 0.0f, 1.0f);
 				ImGui::DragFloat("Shininess", &material.shininess, 0.1f, 0.0f, 100.0f);
 			}
 			ImGui::End();
