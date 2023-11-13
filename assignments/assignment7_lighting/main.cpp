@@ -98,6 +98,10 @@ int main() {
 	lightTransform[2].position = ew::Vec3(-1.5f, 1.5f, -1.5f);
 	lightTransform[3].position = ew::Vec3(-1.5f, 1.5f, 1.5f);
 
+	for (int i = 0; i < MAX_LIGHTS; i++) {
+		lights[i].position = ew::Vec4(lightTransform[i].position, 0.0f);
+	}
+
 	lights[0].color = ew::Vec3(1.0f, 0.0f, 0.0f);
 	lights[1].color = ew::Vec3(0.0f, 1.0f, 0.0f);
 	lights[2].color = ew::Vec3(0.0f, 0.0f, 1.0f);
@@ -111,6 +115,10 @@ int main() {
 	material.specular = 0.5f;
 	material.shininess = 5;
 
+	int numLights = MAX_LIGHTS;
+
+	bool phong = false;
+
 	resetCamera(camera,cameraController);
 
 	while (!glfwWindowShouldClose(window)) {
@@ -119,6 +127,10 @@ int main() {
 		float time = (float)glfwGetTime();
 		float deltaTime = time - prevTime;
 		prevTime = time;
+
+		for (int i = 0; i < MAX_LIGHTS; i++) {
+			lights[i].position = ew::Vec4(lightTransform[i].position, 0.0f);
+		}
 
 		//Update camera
 		camera.aspectRatio = (float)SCREEN_WIDTH / SCREEN_HEIGHT;
@@ -132,12 +144,23 @@ int main() {
 		glBindTexture(GL_TEXTURE_2D, brickTexture);
 		shader.setInt("_Texture", 0);
 		shader.setMat4("_ViewProjection", camera.ProjectionMatrix() * camera.ViewMatrix());
-		shader.setVec4("_Lights[0].position", lights[0].position);
-		shader.setVec3("_Lights[0].color", lights[0].color);
+		for (int i = 0; i < numLights; i++) {
+			shader.setVec4("_Lights[" + std::to_string(i) + "].position", lights[i].position);
+			shader.setVec3("_Lights[" + std::to_string(i) + "].color", lights[i].color);
+		}
 		shader.setFloat("_AmbientK", material.ambientK);
 		shader.setFloat("_DiffuseK", material.diffuseK);
 		shader.setFloat("_Specular", material.specular);
 		shader.setFloat("_Shininess", material.shininess);
+		shader.setVec3("_CameraPos", camera.position);
+		shader.setInt("_NumLights", numLights);
+
+		if (phong) {
+			shader.setInt("_Phong", 1);
+		}
+		else {
+			shader.setInt("_Phong", 0);
+		}
 
 		//Draw shapes
 		shader.setMat4("_Model", cubeTransform.getModelMatrix());
@@ -156,7 +179,7 @@ int main() {
 		lightShader.setMat4("_ViewProjection", camera.ProjectionMatrix() * camera.ViewMatrix());
 
 		//TODO: Render point lights
-		for (int i = 0; i < MAX_LIGHTS; i++) {
+		for (int i = 0; i < numLights; i++) {
 			lightShader.setMat4("_Model", lightTransform[i].getModelMatrix());
 			lightShader.setVec3("_Color", lights[i].color);
 			lightMesh.draw();
@@ -188,11 +211,10 @@ int main() {
 				}
 			}
 			ImGui::ColorEdit3("BG color", &bgColor.x);
-			//ImGui::DragInt("Num Lights", &numLights, 1.0f, 0, MAX_LIGHTS);
-			//ImGui::Checkbox("Orbit Lights", &orbit);
-			//ImGui::DragFloat("Orbit Radius", &orbitRadius, 0.1f);
+			ImGui::SliderInt("Num Lights", &numLights, 1, MAX_LIGHTS);
+			ImGui::Checkbox("Phong", &phong);
 			if (ImGui::CollapsingHeader("Light")) {
-				for (size_t i = 0; i < MAX_LIGHTS; i++) {
+				for (size_t i = 0; i < numLights; i++) {
 					ImGui::PushID(i);
 					ImGui::DragFloat3("Position", &lightTransform[i].position.x, 0.1f);
 					ImGui::ColorEdit3("Color", &lights[i].color.x, 0.1f);
@@ -203,7 +225,7 @@ int main() {
 				ImGui::DragFloat("AmbientK", &material.ambientK, 0.01f, 0.0f, 1.0f);
 				ImGui::DragFloat("DiffuseK", &material.diffuseK, 0.01f, 0.0f, 1.0f);
 				ImGui::DragFloat("SpecularK", &material.specular, 0.01f, 0.0f, 1.0f);
-				ImGui::DragFloat("Shininess", &material.shininess, 0.1f, 0.0f, 100.0f);
+				ImGui::DragFloat("Shininess", &material.shininess, 0.1f, 0.1f, 10.0f);
 			}
 			ImGui::End();
 			
